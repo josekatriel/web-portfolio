@@ -1,9 +1,10 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useState, useEffect, useRef } from "react";
+import gsap from "gsap";
 
 const BackToTop = () => {
   const [show, setShow] = useState(false);
+  const buttonRef = useRef<HTMLAnchorElement>(null);
   
   useEffect(() => {
     const handleScroll = () => {
@@ -18,26 +19,31 @@ const BackToTop = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
   
+  useEffect(() => {
+    const button = buttonRef.current;
+    if (button) {
+      if (show) {
+        gsap.to(button, { opacity: 1, y: 0, duration: 0.3 });
+      } else {
+        gsap.to(button, { opacity: 0, y: 20, duration: 0.3 });
+      }
+    }
+  }, [show]);
+  
   return (
-    <AnimatePresence>
-      {show && (
-        <motion.a
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 20 }}
-          transition={{ duration: 0.3 }}
-          href="#hero"
-          className="
-            fixed right-8 bottom-8 bg-transparent text-[var(--color-secondary)]
-            rounded px-4 py-2.5 text-sm flex items-center gap-1 z-50 no-underline
-            transition-colors duration-200 hover:bg-[var(--color-secondary)] hover:text-white
-          "
-        >
-          <span className="transform -rotate-90 mr-1.5 text-sm">↑</span>
-          Back to top
-        </motion.a>
-      )}
-    </AnimatePresence>
+    <a
+      ref={buttonRef}
+      href="#hero"
+      className="
+        fixed right-8 bottom-8 bg-transparent text-[var(--color-secondary)]
+        rounded px-4 py-2.5 text-sm flex items-center gap-1 z-50 no-underline
+        transition-colors duration-200 hover:bg-[var(--color-secondary)] hover:text-white
+      "
+      style={{ opacity: 0, transform: 'translateY(20px)' }}
+    >
+      <span className="transform -rotate-90 mr-1.5 text-sm">↑</span>
+      Back to top
+    </a>
   );
 };
 

@@ -1,156 +1,199 @@
 "use client";
-import React, { useState } from "react";
-import { Section, Card, Button } from "./ui";
+import React, { useRef, useEffect } from "react";
+import gsap from "gsap";
 
-const Contact = () => {
-  const [formState, setFormState] = useState({
-    name: '',
-    email: '',
-    message: '',
-  });
+interface SocialIconProps {
+  icon: string;
+  url: string;
+  label: string;
+  color: string;
+}
+
+const socialIcons: SocialIconProps[] = [
+  {
+    icon: "ri-discord-fill",
+    url: "https://discord.com/invite/KRADGAwmu5", // <-- valid Discord invite for testing
+    label: "Discord",
+    color: "#5865F2",
+  },
+  {
+    icon: "ri-github-fill",
+    url: "https://github.com/josekatriel",
+    label: "GitHub",
+    color: "#333333",
+  },
+  {
+    icon: "ri-instagram-fill",
+    url: "https://instagram.com/josekatriel",
+    label: "Instagram",
+    color: "#E1306C",
+  },
+  {
+    icon: "ri-twitter-fill",
+    url: "https://x.com/katrjjjj",
+    label: "Twitter",
+    color: "#1DA1F2",
+  },
+  {
+    icon: "ri-youtube-fill",
+    url: "https://www.youtube.com/@katrgames",
+    label: "YouTube",
+    color: "#FF0000",
+  },
+  {
+    icon: "ri-steam-fill",
+    url: "https://store.steampowered.com/app/2500680/Tiny_Chaos/", // <-- replace with your actual Steam profile link
+    label: "Steam",
+    color: "#171A21",
+  },
+];
+
+const SocialIcon: React.FC<SocialIconProps> = ({ icon, url, label, color }) => {
+  const iconRef = useRef<HTMLAnchorElement>(null);
+  const iconCircleRef = useRef<HTMLDivElement>(null);
   
-  const [formStatus, setFormStatus] = useState<null | 'error' | 'success'>(null);
-  
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormState(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-  
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Basic validation
-    if (!formState.name || !formState.email || !formState.message) {
-      setFormStatus('error');
-      return;
-    }
+  useEffect(() => {
+    const icon = iconRef.current;
+    const circle = iconCircleRef.current;
     
-    // Simulate form submission
-    console.log('Form submitted:', formState);
-    setFormStatus('success');
+    if (!icon || !circle) return;
     
-    // Reset form after success
-    setTimeout(() => {
-      setFormState({ name: '', email: '', message: '' });
-      setFormStatus(null);
-    }, 3000);
-  };
+    // Create magnetic effect
+    icon.addEventListener("mousemove", (e) => {
+      console.log('mousemove on', label); // Debug: see if event fires for all icons
+      const { clientX, clientY } = e;
+      const { left, top, width, height } = icon.getBoundingClientRect();
+      
+      const x = (clientX - left - width / 2) * 0.5;
+      const y = (clientY - top - height / 2) * 0.5;
+      
+      gsap.to(circle, {
+        x,
+        y,
+        scale: 1.12,
+        duration: 0.25,
+        ease: "power2.out",
+      });
+      
+      gsap.to(icon, {
+        scale: 1.05,
+        duration: 0.3,
+        ease: "power2.out"
+      });
+    });
+    
+    icon.addEventListener("mouseleave", () => {
+      gsap.to(circle, {
+        x: 0,
+        y: 0,
+        duration: 0.5,
+        ease: "elastic.out(1, 0.3)"
+      });
+      
+      gsap.to(icon, {
+        scale: 1,
+        duration: 0.5,
+        ease: "elastic.out(1, 0.3)"
+      });
+    });
+    
+    return () => {
+      icon.removeEventListener("mousemove", () => {});
+      icon.removeEventListener("mouseleave", () => {});
+    };
+  }, []);
   
   return (
-    <Section id="contact" background="glass">
-      <h2 className="text-3xl font-semibold text-[var(--color-primary)]">Contact</h2>
+    <a 
+      ref={iconRef}
+      href={url} 
+      target="_blank" 
+      rel="noopener noreferrer"
+      className="relative flex items-center justify-center w-16 h-16 rounded-full bg-white/10 backdrop-blur-sm hover:backdrop-blur-lg transition-all duration-300"
+      aria-label={label}
+      style={{ pointerEvents: 'auto' }}
+      tabIndex={0}
+    >
+      <div 
+        ref={iconCircleRef}
+        className="absolute inset-0 w-full h-full rounded-full"
+        style={{ background: `radial-gradient(circle, ${color}40 0%, transparent 70%)` }}
+      ></div>
+      <i className={`${icon} text-3xl`} style={{ color }}></i>
+    </a>
+  );
+};
+
+const Contact: React.FC = () => {
+  const contactRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.from(".contact-title", {
+        opacity: 0,
+        y: 20,
+        duration: 0.8,
+        scrollTrigger: {
+          trigger: contactRef.current,
+          start: "top 70%",
+        },
+      });
       
-      <div className="flex flex-wrap gap-8 mt-6">
-        {/* Contact Form */}
-        <Card variant="solid" className="flex-1 min-w-[280px]">
-          <form 
-            className="flex flex-col gap-4"
-            onSubmit={handleSubmit}
-          >
-            <div>
-              <label 
-                htmlFor="name" 
-                className="block mb-2 text-sm text-[var(--color-primary)]"
-              >
-                Your Name
-              </label>
-              <input 
-                id="name"
-                name="name"
-                type="text" 
-                value={formState.name}
-                onChange={handleChange}
-                className="w-full py-3 px-3 rounded-lg border border-[var(--color-secondary)] bg-[var(--color-white)] font-sans" 
-                required 
-              />
-            </div>
-            
-            <div>
-              <label 
-                htmlFor="email" 
-                className="block mb-2 text-sm text-[var(--color-primary)]"
-              >
-                Email Address
-              </label>
-              <input 
-                id="email"
-                name="email"
-                type="email" 
-                value={formState.email}
-                onChange={handleChange}
-                className="w-full py-3 px-3 rounded-lg border border-[var(--color-secondary)] bg-[var(--color-white)] font-sans" 
-                required 
-              />
-            </div>
-            
-            <div>
-              <label 
-                htmlFor="message" 
-                className="block mb-2 text-sm text-[var(--color-primary)]"
-              >
-                Your Message
-              </label>
-              <textarea 
-                id="message"
-                name="message"
-                value={formState.message}
-                onChange={handleChange}
-                rows={5} 
-                className="w-full py-3 px-3 rounded-lg border border-[var(--color-secondary)] bg-[var(--color-white)] font-sans" 
-                required 
-              />
-            </div>
-            
-            <Button 
-              type="submit"
-              variant="primary"
-              size="lg"
-              className="mt-2"
-            >
-              Send Message
-            </Button>
-            
-            {formStatus === 'success' && (
-              <div className="p-3 bg-[#dff5e8] text-[#0a723a] rounded-lg mt-4 text-sm">
-                Thank you! Your message has been sent successfully.
-              </div>
-            )}
-            
-            {formStatus === 'error' && (
-              <div className="p-3 bg-[#fbe9e7] text-[#c62828] rounded-lg mt-4 text-sm">
-                Please fill out all fields before submitting.
-              </div>
-            )}
-          </form>
-        </Card>
+      gsap.from(".contact-icons .icon-wrapper", {
+        opacity: 0,
+        y: 30,
+        stagger: 0.1,
+        duration: 0.6,
+        scrollTrigger: {
+          trigger: contactRef.current,
+          start: "top 60%",
+        },
+      });
+      
+      gsap.from(".contact-email", {
+        opacity: 0,
+        y: 20,
+        duration: 0.8,
+        delay: 0.5,
+        scrollTrigger: {
+          trigger: contactRef.current,
+          start: "top 60%",
+        },
+      });
+    });
+    
+    return () => ctx.revert();
+  }, []);
+  
+  return (
+    <div ref={contactRef} className="relative w-full py-24 px-6 flex flex-col items-center">
+      {/* Background gradient */}
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#0001] opacity-50"></div>
+      
+      <div className="relative z-10 max-w-5xl w-full mx-auto">
+        <h2 className="contact-title text-4xl md:text-5xl font-bold text-center mb-16 bg-clip-text text-transparent bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-accent)]">
+          Let's Connect
+        </h2>
         
-        {/* Contact Information */}
-        <Card variant="glass" className="flex-1 min-w-[280px]">
-          <h3 className="text-xl font-semibold text-[var(--color-primary)] mb-6">Get in Touch</h3>
-          
-          <div className="mb-6">
-            <div className="font-semibold mb-2">Email</div>
-            <a href="mailto:jose@example.com" className="text-[var(--color-accent)] no-underline hover:underline">jose@example.com</a>
-          </div>
-          
-          <div className="mb-6">
-            <div className="font-semibold mb-2">Location</div>
-            <div>Los Angeles, California</div>
-          </div>
-          
-          <div>
-            <div className="font-semibold mb-2">Social Media</div>
-            <div className="flex gap-4">
-              <a href="#" className="text-[var(--color-primary)] text-lg no-underline hover:text-[var(--color-accent)]">LinkedIn</a>
-              <a href="#" className="text-[var(--color-primary)] text-lg no-underline hover:text-[var(--color-accent)]">Twitter</a>
-              <a href="#" className="text-[var(--color-primary)] text-lg no-underline hover:text-[var(--color-accent)]">Instagram</a>
+        <div className="contact-icons grid grid-cols-3 sm:grid-cols-6 gap-6 justify-center mb-16">
+          {socialIcons.map((icon, index) => (
+            <div key={icon.label} className="icon-wrapper flex justify-center">
+              <SocialIcon {...icon} />
             </div>
-          </div>
-        </Card>
+          ))}
+        </div>
+        
+        <div className="contact-email text-center">
+          <p className="text-lg text-secondary mb-3">Or reach out</p>
+          <a 
+            href="mailto:work.josekatriel@gmail.com" 
+            className="inline-block text-xl md:text-2xl font-medium text-accent hover:underline transition-all duration-300"
+          >
+            work.josekatriel@gmail.com
+          </a>
+        </div>
       </div>
-    </Section>
+    </div>
   );
 };
 

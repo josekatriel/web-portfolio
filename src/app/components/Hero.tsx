@@ -1,15 +1,20 @@
 import React from "react";
 import { Section } from "./ui";
+import SpotlightGrid from "./effects/spotlight-grid";
 
 const Hero = () => (
   <Section 
     id="hero"
     background="tertiary"
     fullHeight
-    className="flex flex-row items-stretch overflow-hidden"
+    className="relative flex flex-row items-stretch overflow-hidden"
   >
+    {/* Spotlight effect background */}
+    <div className="absolute inset-0 w-full h-full pointer-events-none z-0">
+      <SpotlightGrid />
+    </div>
     {/* Left Column */}
-    <div className="flex-1 flex flex-col justify-center items-start pl-[5vw] relative">
+    <div className="relative flex-1 flex flex-col justify-center items-start pl-[5vw] z-10">
       <h1 className="text-[6vw] font-bold tracking-tighter m-0 text-[var(--color-primary)]">
         Hello
       </h1>
@@ -26,14 +31,7 @@ const Hero = () => (
         Scroll down ↓
       </a>
     </div>
-    {/* Right Column */}
-    <div className="flex-[1.1] flex items-center justify-center relative">
-      <img
-        src="https://randomuser.me/api/portraits/men/75.jpg"
-        alt="Profile"
-        className="w-3/4 max-w-[420px] rounded-full object-cover shadow-2xl border-6 border-[var(--color-bg)] transition-transform duration-500 hover:scale-105"
-      />
-    </div>
+    {/* Removed right column image for a cleaner, effect-driven hero */}
   </Section>
 );
 

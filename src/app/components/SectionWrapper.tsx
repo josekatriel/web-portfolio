@@ -1,17 +1,37 @@
 "use client";
-import React from "react";
-import { motion } from "framer-motion";
+import React, { useEffect, useRef } from "react";
+import gsap from "gsap";
+import ScrollTrigger from "gsap/ScrollTrigger";
 
-const SectionWrapper = ({ children }: { children: React.ReactNode }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 40 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true, amount: 0.3 }}
-    transition={{ duration: 0.7, ease: "easeOut" }}
-    style={{ width: '100%' }}
-  >
-    {children}
-  </motion.div>
-);
+gsap.registerPlugin(ScrollTrigger);
+
+const SectionWrapper = ({ children }: { children: React.ReactNode }) => {
+  const sectionRef = useRef<HTMLDivElement>(null);
+
+  
+
+  useEffect(() => {
+    const element = sectionRef.current;
+    if (element) {
+      gsap.fromTo(
+        element,
+        { opacity: 0, y: 40 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.7,
+          ease: "easeOut",
+          scrollTrigger: {
+            trigger: element,
+            start: "top 80%",
+            toggleActions: "play none none none",
+          },
+        }
+      );
+    }
+  }, []);
+
+  return <div ref={sectionRef} style={{ width: '100%' }}>{children}</div>;
+};
 
 export default SectionWrapper;
