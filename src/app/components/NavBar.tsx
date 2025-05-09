@@ -12,10 +12,25 @@ const navLinks = [
 const NavBar = () => {
   const [show, setShow] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const lastScroll = useRef(0);
   const navRef = useRef<HTMLElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const atomIconRef = useRef<HTMLDivElement>(null);
+  
+  // Check if we're on the client side and update mobile state
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    // Initial check
+    checkIsMobile();
+    
+    // Add resize listener
+    window.addEventListener('resize', checkIsMobile);
+    return () => window.removeEventListener('resize', checkIsMobile);
+  }, []);
 
   // Handle scroll to hide/show navbar
   useEffect(() => {
@@ -114,9 +129,9 @@ const NavBar = () => {
           <div 
             ref={atomIconRef}
             className="group flex items-center font-bold text-2xl tracking-tight text-[var(--color-primary)] select-none cursor-pointer"
-            onClick={() => window.innerWidth < 768 ? setMobileMenuOpen(!mobileMenuOpen) : null}
+            onClick={() => isMobile ? setMobileMenuOpen(!mobileMenuOpen) : null}
             aria-expanded={mobileMenuOpen}
-            aria-label={window.innerWidth < 768 ? "Toggle menu" : "Home"}
+            aria-label={isMobile ? "Toggle menu" : "Home"}
             role="button"
             tabIndex={0}
           >

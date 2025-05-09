@@ -14,19 +14,32 @@ const findProject = (categoryId: string, projectId: string) => {
   return project ? { ...project, category } : null;
 };
 
-export default function ProjectDetail({ params }: { params: { categoryId: string; projectId: string } }) {
-  // Use params directly instead of destructuring to avoid unused variable warnings
-  
-  // Define proper type instead of using 'any'
-  interface ProjectWithCategory {
+// Define type for our project data
+interface ProjectWithCategory {
+  id: string;
+  title: string;
+  description: string;
+  gallery: GalleryItem[];
+  tags: string[];
+  category: {
     id: string;
     title: string;
-    description: string;
-    gallery: GalleryItem[];
-    tags: string[];
-    category: any; // This could be further typed if needed
-    [key: string]: any; // For any other properties
-  }
+    [key: string]: any;
+  };
+  link?: string;
+  [key: string]: any; // For any other properties
+}
+
+// Properly type the page params for Next.js 15
+type PageParams = {
+  params: {
+    categoryId: string;
+    projectId: string;
+  };
+  searchParams?: Record<string, string | string[] | undefined>;
+};
+
+export default function ProjectDetail({ params }: PageParams) {
   
   const [project, setProject] = useState<ProjectWithCategory | null>(null);
   const [loading, setLoading] = useState(true);
@@ -34,10 +47,13 @@ export default function ProjectDetail({ params }: { params: { categoryId: string
   const galleryRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Find the project data based on params
-    const projectData = findProject(params.categoryId, params.projectId);
-    setProject(projectData);
-    setLoading(false);
+    // Only run on client-side
+    if (typeof window !== 'undefined') {
+      // Find the project data based on params
+      const projectData = findProject(params.categoryId, params.projectId);
+      setProject(projectData);
+      setLoading(false);
+    }
 
     // If project not found, this will trigger the notFound() in the next render
   }, [params.categoryId, params.projectId]);
