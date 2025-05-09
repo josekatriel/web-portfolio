@@ -172,11 +172,11 @@ const Contact: React.FC = () => {
       
       <div className="relative z-10 max-w-5xl w-full mx-auto">
         <h2 className="contact-title text-4xl md:text-5xl font-bold text-center mb-16 bg-clip-text text-transparent bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-accent)]">
-          Let's Connect
+          Let&apos;s Connect
         </h2>
         
         <div className="contact-icons grid grid-cols-3 sm:grid-cols-6 gap-6 justify-center mb-16">
-          {socialIcons.map((icon, index) => (
+          {socialIcons.map((icon) => (
             <div key={icon.label} className="icon-wrapper flex justify-center">
               <SocialIcon {...icon} />
             </div>

@@ -15,9 +15,20 @@ const findProject = (categoryId: string, projectId: string) => {
 };
 
 export default function ProjectDetail({ params }: { params: { categoryId: string; projectId: string } }) {
-  const { categoryId, projectId } = params;
-
-  const [project, setProject] = useState<any>(null);
+  // Use params directly instead of destructuring to avoid unused variable warnings
+  
+  // Define proper type instead of using 'any'
+  interface ProjectWithCategory {
+    id: string;
+    title: string;
+    description: string;
+    gallery: GalleryItem[];
+    tags: string[];
+    category: any; // This could be further typed if needed
+    [key: string]: any; // For any other properties
+  }
+  
+  const [project, setProject] = useState<ProjectWithCategory | null>(null);
   const [loading, setLoading] = useState(true);
   const [lightboxItem, setLightboxItem] = useState<GalleryItem | null>(null);
   const galleryRef = useRef<HTMLDivElement>(null);
@@ -41,9 +52,11 @@ export default function ProjectDetail({ params }: { params: { categoryId: string
     return () => window.removeEventListener('keydown', handleEscape);
   }, []);
 
-  // Show 404 if project not found
+  // After loading is done and project not found, return 404 page
   if (!loading && !project) {
     notFound();
+    // TypeScript doesn't know notFound() never returns, so we add this
+    return null;
   }
 
   if (loading) {
@@ -54,6 +67,10 @@ export default function ProjectDetail({ params }: { params: { categoryId: string
     );
   }
 
+  // At this point, we know project is not null due to earlier check and return
+  // TypeScript still complains, so we'll create a safe version of our project data
+  const safeProject = project!; // Non-null assertion is safe here because of the check above
+  
   return (
     <div className="min-h-screen bg-[#0f0f0f] text-white overflow-hidden">
       {/* Header with back button and title */}
@@ -63,11 +80,11 @@ export default function ProjectDetail({ params }: { params: { categoryId: string
             ← Back to Projects
           </Link>
           <div>
-            <h1 className="text-xl md:text-2xl font-bold">{project.title}</h1>
-            <p className="text-sm opacity-70">{project.category.title}</p>
+            <h1 className="text-xl md:text-2xl font-bold">{safeProject.title}</h1>
+            <p className="text-sm opacity-70">{safeProject.category.title}</p>
           </div>
           <a 
-            href={project.link} 
+            href={safeProject.link} 
             target="_blank" 
             rel="noopener noreferrer"
             className="px-4 py-2 bg-accent text-white rounded-lg hover:bg-opacity-80 transition"
@@ -82,7 +99,7 @@ export default function ProjectDetail({ params }: { params: { categoryId: string
         ref={galleryRef}
         className="gallery-grid pt-20 pb-8 px-4 md:p-20 w-full min-h-screen grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
       >
-        {project.gallery.map((item: GalleryItem) => (
+        {safeProject.gallery.map((item: GalleryItem) => (
           item.type === 'video' && item.url ? (
             <a
               key={item.id}
@@ -185,7 +202,7 @@ export default function ProjectDetail({ params }: { params: { categoryId: string
             
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-6">
               <h3 className="text-xl font-semibold text-white">{lightboxItem.caption || lightboxItem.alt}</h3>
-              <p className="text-white/70 mt-1">{project.title} • {project.category.title}</p>
+              <p className="text-white/70 mt-1">{safeProject.title} • {safeProject.category.title}</p>
             </div>
           </div>
         </div>

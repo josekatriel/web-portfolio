@@ -19,7 +19,7 @@ const Hero = () => (
         Hello
       </h1>
       <div className="text-lg text-[var(--color-text)] mt-6 mb-10 max-w-md">
-        — It's Jose, crafting worlds with code, pixels, and passion.
+        ⁠ It&apos;s Jose, crafting worlds with code, pixels, and passion.
       </div>
       <div className="absolute -left-[20%] top-[40%] [writing-mode:vertical-rl] [text-orientation:auto] text-[var(--color-secondary)] text-sm tracking-widest opacity-70 rotate-180 z-10">
         Game Developer

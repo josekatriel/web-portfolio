@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
-import { MousePointerClick, Atom, X } from "lucide-react";
+import { MousePointerClick, Atom } from "lucide-react";
 import gsap from "gsap";
 
 const navLinks = [

@@ -1,6 +1,6 @@
 "use client";
 import React, { useRef, useEffect } from "react";
-import galleryMedia, { GalleryMedia } from "../data/gallery";
+import galleryMedia from "../data/gallery";
 import gsap from "gsap";
 
 const Gallery = () => {
