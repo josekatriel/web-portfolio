@@ -1,5 +1,5 @@
 import { MetadataRoute } from "next";
-import { projects } from "./data/projects";
+import { projectCategories } from "./data/projects";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl =
@@ -15,7 +15,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }));
 
   // Dynamic project routes
-  const projectRoutes = projects.flatMap((category) =>
+  const projectRoutes = projectCategories.flatMap((category) =>
     category.projects.map((project) => ({
       url: `${baseUrl}/project/${category.id}/${project.id}`,
       lastModified: new Date().toISOString().split("T")[0],
