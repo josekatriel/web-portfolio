@@ -3,13 +3,14 @@
 import { useEffect, useState, useRef } from 'react';
 import { projectCategories, GalleryItem } from '@/app/data/projects';
 import Link from 'next/link';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 
 // Utility function to find a project by category and project ID
 const findProject = (categoryId: string, projectId: string) => {
   const category = projectCategories.find(cat => cat.id === categoryId);
   if (!category) return null;
-  
+
   const project = category.projects.find(proj => proj.id === projectId);
   return project ? { ...project, category } : null;
 };
@@ -24,10 +25,12 @@ interface ProjectWithCategory {
   category: {
     id: string;
     title: string;
-    [key: string]: any;
+    description?: string;
+    thumbnail?: string;
   };
   link?: string;
-  [key: string]: any; // For any other properties
+  // Add other known properties here instead of using [key: string]: any
+  [key: string]: string | string[] | GalleryItem[] | { id: string; title: string; description?: string; thumbnail?: string; } | undefined;
 }
 
 // Properly type the page params for Next.js 15
@@ -40,7 +43,7 @@ type PageParams = {
 };
 
 export default function ProjectDetail({ params }: PageParams) {
-  
+
   const [project, setProject] = useState<ProjectWithCategory | null>(null);
   const [loading, setLoading] = useState(true);
   const [lightboxItem, setLightboxItem] = useState<GalleryItem | null>(null);
@@ -63,7 +66,7 @@ export default function ProjectDetail({ params }: PageParams) {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setLightboxItem(null);
     };
-    
+
     window.addEventListener('keydown', handleEscape);
     return () => window.removeEventListener('keydown', handleEscape);
   }, []);
@@ -86,7 +89,7 @@ export default function ProjectDetail({ params }: PageParams) {
   // At this point, we know project is not null due to earlier check and return
   // TypeScript still complains, so we'll create a safe version of our project data
   const safeProject = project!; // Non-null assertion is safe here because of the check above
-  
+
   return (
     <div className="min-h-screen bg-[#0f0f0f] text-white overflow-hidden">
       {/* Header with back button and title */}
@@ -99,9 +102,9 @@ export default function ProjectDetail({ params }: PageParams) {
             <h1 className="text-xl md:text-2xl font-bold">{safeProject.title}</h1>
             <p className="text-sm opacity-70">{safeProject.category.title}</p>
           </div>
-          <a 
-            href={safeProject.link} 
-            target="_blank" 
+          <a
+            href={safeProject.link}
+            target="_blank"
             rel="noopener noreferrer"
             className="px-4 py-2 bg-accent text-white rounded-lg hover:bg-opacity-80 transition"
           >
@@ -111,11 +114,11 @@ export default function ProjectDetail({ params }: PageParams) {
       </header>
 
       {/* Full screen gallery grid */}
-      <div 
+      <div
         ref={galleryRef}
         className="gallery-grid pt-20 pb-8 px-4 md:p-20 w-full min-h-screen grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
       >
-        {safeProject.gallery.map((item: GalleryItem) => (
+        {safeProject.gallery.map((item: GalleryItem, index: number) => (
           item.type === 'video' && item.url ? (
             <a
               key={item.id}
@@ -146,64 +149,70 @@ export default function ProjectDetail({ params }: PageParams) {
               </div>
             </a>
           ) : (
-            <div 
+            <div
               key={item.id}
               className="gallery-item relative group cursor-pointer overflow-hidden rounded-lg"
               onClick={() => setLightboxItem(item)}
             >
               {item.type === 'image' ? (
-                <img
+                <Image
                   src={item.src}
                   alt={item.alt}
-                className="w-full h-full object-cover aspect-square transition-transform duration-500 group-hover:scale-105"
-              />
-            ) : item.type === 'video' ? (
-              <div className="relative aspect-square bg-black/30 flex items-center justify-center">
-                <video
-                  src={item.src}
-                  className="w-full h-full object-cover"
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
+                  width={800}
+                  height={800}
+                  className="w-full h-full object-cover aspect-square transition-transform duration-500 group-hover:scale-105"
+                  priority={index < 3} // Prioritize loading first few images
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60"></div>
-                <div className="absolute bottom-4 left-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
-                  Video
+              ) : item.type === 'video' ? (
+                <div className="relative aspect-square bg-black/30 flex items-center justify-center">
+                  <video
+                    src={item.src}
+                    className="w-full h-full object-cover"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60"></div>
+                  <div className="absolute bottom-4 left-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
+                    Video
+                  </div>
                 </div>
+              ) : null
+              }
+              {/* Hover overlay with details */}
+              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                <p className="text-lg font-semibold text-white">{item.caption || item.alt}</p>
               </div>
-            ) : null
-          }
-          {/* Hover overlay with details */}
-          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
-            <p className="text-lg font-semibold text-white">{item.caption || item.alt}</p>
-          </div>
-        </div>
-      )
-    ))}      </div>
+            </div>
+          )
+        ))}      </div>
 
       {/* Lightbox */}
       {lightboxItem && (
-        <div 
+        <div
           className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 md:p-10"
           onClick={() => setLightboxItem(null)}
         >
-          <button 
+          <button
             className="absolute top-6 right-6 text-white z-10 bg-black/50 rounded-full w-10 h-10 flex items-center justify-center"
             onClick={() => setLightboxItem(null)}
           >
             ✕
           </button>
-          
-          <div 
+
+          <div
             className="relative max-w-5xl max-h-full overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {lightboxItem.type === 'image' ? (
-              <img
+              <Image
                 src={lightboxItem.src}
                 alt={lightboxItem.alt}
+                width={1600}
+                height={1200}
                 className="w-full h-auto max-h-[80vh] object-contain"
+                priority
               />
             ) : lightboxItem.type === 'video' ? (
               <video
@@ -215,7 +224,7 @@ export default function ProjectDetail({ params }: PageParams) {
                 playsInline
               />
             ) : null}
-            
+
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-6">
               <h3 className="text-xl font-semibold text-white">{lightboxItem.caption || lightboxItem.alt}</h3>
               <p className="text-white/70 mt-1">{safeProject.title} • {safeProject.category.title}</p>

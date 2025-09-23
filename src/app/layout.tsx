@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Work_Sans, Open_Sans } from "next/font/google";
+import { Manrope, Open_Sans } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 
-const workSans = Work_Sans({
+const manrope = Manrope({
   subsets: ["latin"],
-  variable: "--font-work-sans",
+  variable: "--font-manrope",
   display: "swap",
 });
 
@@ -73,7 +73,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${manrope.variable} ${openSans.variable} font-sans`}>
       <head>
         <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -93,9 +93,7 @@ export default function RootLayout({
           `}
         </Script>
       </head>
-      <body
-        className={`${workSans.variable} ${openSans.variable} antialiased`}
-      >
+      <body>
         {children}
       </body>
     </html>
